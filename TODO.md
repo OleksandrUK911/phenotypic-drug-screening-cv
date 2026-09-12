@@ -6,6 +6,12 @@ cross-cutting concerns that don't belong to a single module.
 
 Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
+**Status snapshot:** core ML pipeline (sections 1–5 and 7: data → segmentation → SSL features →
+anomaly detection → MOA classification → explainability) is implemented with 42/42 unit tests
+passing. Repo governance/ethics/devex scaffolding (sections 16, 18, 22) partially in place. Not
+yet started: evaluation/baselines, active learning, multimodal, transfer-defense demo, MLOps
+training/serving, CI, and most documentation content beyond placeholders.
+
 ## 0. Repo foundations
 
 - [ ] `pyproject.toml` — package `src` as an installable module (`pip install -e .`), pin Python version
@@ -17,47 +23,47 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] `Makefile` or `justfile` — `make setup`, `make train`, `make test`, `make lint` shortcuts
 - [ ] `docker-compose.yml` — local MLflow tracking server + inference API service
 
-## 1. Data layer (`src/data/`) — currently missing entirely
+## 1. Data layer (`src/data/`) — [x] core implemented
 
-- [ ] `download.py` — programmatic fetch of BBBC021 / JUMP-CP subset (checksum-verified, resumable)
-- [ ] `preprocessing.py` — illumination correction, per-channel normalization, tiling of large plate scans
-- [ ] `dataset.py` — PyTorch `Dataset`/`Dataset` classes for multi-channel Cell Painting images (5 stains)
-- [ ] `splits.py` — **plate-aware** train/val/test splitting (never split by image — causes batch-effect leakage)
-- [ ] `schema.py` — typed metadata schema (plate ID, well, compound, concentration, replicate)
-- [ ] `data/README.md` — document expected raw layout, licensing/usage terms of BBBC021/JUMP-CP
+- [x] `download.py` — programmatic fetch of BBBC021 / JUMP-CP subset (scrapes current page links, bounded plate subset; checksum verification supported but not yet wired to known hashes)
+- [x] `preprocessing.py` — illumination correction, per-channel normalization, tiling of large plate scans
+- [x] `dataset.py` — PyTorch `Dataset` class for multi-channel Cell Painting images (5 stains)
+- [x] `splits.py` — **plate-aware** train/val/test splitting, with `assert_no_plate_leakage` guard
+- [x] `schema.py` — typed metadata schema (plate ID, well, compound, concentration, replicate)
+- [x] `data/README.md` — placeholder present; still needs real BBBC021/JUMP-CP layout/licensing detail (see section 15/16)
 - [ ] Sanity-check notebook: class balance, missing wells, per-plate intensity distributions
 
-## 2. Segmentation (`src/segmentation/`)
+## 2. Segmentation (`src/segmentation/`) — [x] core implemented
 
-- [ ] Baseline: pretrained Cellpose inference wrapper (fast path to get masks without training)
+- [x] Baseline: pretrained Cellpose inference wrapper (fast path to get masks without training)
 - [ ] U-Net trained from scratch on BBBC labeled subset (learning exercise / fallback if Cellpose insufficient)
-- [ ] Post-processing: watershed splitting of touching cells, small-object filtering
-- [ ] Instance-level QC metrics: per-image cell count sanity bounds, mask-area outlier flagging
-- [ ] Export: per-cell crops + per-cell metadata table (feeds `features/`)
+- [x] Post-processing: watershed splitting of touching cells, small-object filtering
+- [x] Instance-level QC metrics: per-image cell count sanity bounds, mask-area outlier flagging
+- [x] Export: per-cell crops + per-cell metadata table (feeds `features/`)
 
-## 3. Self-supervised features (`src/features/`)
+## 3. Self-supervised features (`src/features/`) — [~] core implemented, not yet trained end-to-end
 
-- [ ] SimCLR or DINO pretraining loop on unlabeled per-cell crops
-- [ ] Embedding extraction pipeline (backbone → fixed-size vector per cell)
-- [ ] Aggregate to per-well embeddings (mean/median pooling across cells)
-- [ ] **Batch-effect correction**: ComBat or Typical Variation Normalization (TVN) on well-level embeddings
+- [~] SimCLR model + NT-Xent loss + augmentations implemented (`simclr.py`, `augmentations.py`); no `scripts/train.py` driving an actual pretraining run yet
+- [x] Embedding extraction pipeline (backbone → fixed-size vector per cell)
+- [x] Aggregate to per-well embeddings (median pooling, robust to outlier cells)
+- [x] **Batch-effect correction**: Typical Variation Normalization (TVN) on well-level embeddings, tested
 - [ ] Embedding quality check: UMAP/t-SNE plot colored by plate — should NOT cluster by plate after correction
 - [ ] Ablation: with vs. without batch correction, effect on downstream MOA accuracy
 
-## 4. Anomaly detection (`src/anomaly_detection/`)
+## 4. Anomaly detection (`src/anomaly_detection/`) — [x] core implemented
 
-- [ ] Autoencoder reconstruction-error scoring vs. DMSO/vehicle control wells
-- [ ] Alternative: Mahalanobis distance / kNN distance in corrected embedding space
-- [ ] **Z-factor / SSMD** computation per plate — standard HCS assay-quality metrics (shows domain depth)
-- [ ] Hit-calling threshold selection + ROC-AUC against known active compounds (if labels available)
+- [x] Autoencoder reconstruction-error scoring vs. DMSO/vehicle control wells
+- [x] Alternative: Mahalanobis distance / kNN distance in corrected embedding space
+- [x] **Z-factor / SSMD** computation per plate — standard HCS assay-quality metrics, tested against synthetic worked examples
+- [x] Hit-calling threshold selection (Youden's J) + ROC-AUC against known active compounds
 - [ ] Visualization: control vs. hit phenotype gallery (example images side by side)
 
-## 5. MOA classification (`src/moa_classification/`)
+## 5. MOA classification (`src/moa_classification/`) — [x] core implemented
 
-- [ ] Multi-class classifier on corrected embeddings (compound → mechanism-of-action label)
-- [ ] Handle **label noise** explicitly (documented MOA annotations are known to be imperfect) — e.g. label smoothing or noise-robust loss
-- [ ] Uncertainty quantification: Deep Ensembles or MC Dropout, calibration curve (reliability diagram)
-- [ ] Confusion matrix analysis grouped by MOA family, not just raw accuracy
+- [x] Multi-class classifier on corrected embeddings (compound → mechanism-of-action label)
+- [x] Handle **label noise** explicitly — label smoothing + Generalized Cross Entropy (Zhang & Sabuncu)
+- [x] Uncertainty quantification: MC Dropout + Deep Ensembles, plus reliability diagram / Expected Calibration Error
+- [x] Confusion matrix analysis grouped by MOA family, not just raw accuracy
 
 ## 6. Active learning (`src/active_learning/`) — NEW MODULE
 
@@ -66,11 +72,11 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] Compare active-learning sampling vs. random sampling — learning curve (accuracy vs. #compounds screened)
 - [ ] Short write-up connecting this to real AI-driven drug discovery triage (Exscientia-style narrative)
 
-## 7. Explainability (`src/explainability/`)
+## 7. Explainability (`src/explainability/`) — [x] core implemented
 
-- [ ] Grad-CAM (or attention rollout if using a ViT backbone) over per-cell crops
-- [ ] Aggregate explanation maps per MOA class — "what morphological region drives this MOA call"
-- [ ] Sanity check: explanations should highlight cell body/nucleus regions, not background artifacts
+- [x] Grad-CAM over per-cell crops (custom hook-based implementation, ViT attention-rollout variant not done)
+- [x] Aggregate explanation maps per MOA class — "what morphological region drives this MOA call"
+- [x] Sanity check: automated flagging of explanations whose activation mass falls mostly outside the segmented cell (background-heavy)
 
 ## 8. Evaluation & baselines (`src/evaluation/`) — NEW MODULE
 
@@ -105,13 +111,13 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] Hydra/OmegaConf YAML per experiment (segmentation.yaml, ssl_pretrain.yaml, moa_classifier.yaml, etc.)
 - [ ] Environment config (paths, seeds, device) separated from model/experiment config
 
-## 13. Testing (`tests/`)
+## 13. Testing (`tests/`) — [~] 35/35 tests passing, CI not wired yet
 
-- [ ] Unit tests for preprocessing (normalization correctness, shape checks)
-- [ ] Unit tests for dataset/dataloader (batch shapes, plate-aware split correctness — no leakage)
-- [ ] Segmentation smoke test (runs on a tiny fixture image, checks mask shape/dtype)
-- [ ] Metrics unit tests (Z-factor/SSMD computed against known worked example)
-- [ ] CI runs all of the above on every push
+- [ ] Unit tests for preprocessing itself (illumination correction / normalization correctness) — not yet written
+- [x] Unit tests for plate-aware split correctness (determinism, no leakage, too-few-plates error)
+- [ ] Segmentation smoke test on a tiny fixture image through the actual Cellpose wrapper (postprocessing/QC are tested; Cellpose itself is not, since it's a heavy optional dependency)
+- [x] Metrics unit tests (Z-factor/SSMD computed against synthetic worked examples — well-separated vs. overlapping controls)
+- [ ] CI runs all of the above on every push (see section 0 — `ci.yml` not yet created)
 
 ## 14. Documentation & portfolio polish
 
@@ -133,10 +139,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## 16. Ethics, compliance & responsible-use framing
 
-- [ ] `ETHICS.md` — explicit statement: public data only, no PII, no clinical/diagnostic claims, no operational defense claims (ties into the transfer-to-defense demo's disclaimer)
-- [ ] Dual-use awareness note: briefly acknowledge that phenotypic screening + defense-imagery transfer touches dual-use-adjacent territory, and state the project's boundaries explicitly (portfolio/research only)
-- [ ] License compliance check for BBBC021/JUMP-CP redistribution terms (don't recommit raw data to the repo — already gitignored, but document *why* in `data/DATASET_CARD.md`)
-- [ ] `.github/dependabot.yml` — automated dependency vulnerability alerts (cheap, signals security hygiene)
+- [x] `ETHICS.md` — explicit statement: public data only, no PII, no clinical/diagnostic claims, no operational defense claims
+- [x] Dual-use awareness note (included in `ETHICS.md`)
+- [ ] License compliance check for BBBC021/JUMP-CP redistribution terms — `data/DATASET_CARD.md` exists but still a stub, needs real content
+- [x] `.github/dependabot.yml` — automated dependency vulnerability alerts
 
 ## 17. Deployment & live demo (portfolio-critical)
 
@@ -147,11 +153,11 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## 18. Documentation site & repo polish
 
-- [ ] `mkdocs.yml` + `docs/` as an MkDocs Material site, published via GitHub Pages — turns scattered `.md` files into a browsable site (nice portfolio link separate from the raw repo)
+- [ ] `mkdocs.yml` + `docs/` as an MkDocs Material site, published via GitHub Pages
 - [ ] README badges: CI status, license, Python version, (optional) docs-site link
-- [ ] `CONTRIBUTING.md` — even solo, states code style/PR conventions; signals professionalism to reviewers
-- [ ] `CODEOWNERS` — trivial for a solo repo but a recognized convention
-- [ ] `.env.example` — documents expected env vars (MLflow tracking URI, etc.) without committing secrets
+- [x] `CONTRIBUTING.md`
+- [x] `CODEOWNERS`
+- [x] `.env.example`
 
 ## 19. Scalability & large-data engineering
 
@@ -186,13 +192,12 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 ## 22. Developer experience
 
-- [ ] `requirements-dev.txt` — separate dev-only deps (pytest, black, ruff, mypy, jupyter) from runtime `requirements.txt`
-- [ ] `.devcontainer/devcontainer.json` — one-click reproducible dev environment (VS Code Dev Containers/Codespaces)
-- [ ] `.github/PULL_REQUEST_TEMPLATE.md` — checklist (tests pass, lint clean, TODO.md updated) even for solo use
+- [x] `requirements-dev.txt` — separate dev-only deps (pytest, black, ruff, mypy, jupyter) from runtime `requirements.txt`
+- [x] `.devcontainer/devcontainer.json` — one-click reproducible dev environment (VS Code Dev Containers/Codespaces)
+- [x] `.github/PULL_REQUEST_TEMPLATE.md` — checklist (tests pass, lint clean, TODO.md updated) even for solo use
 - [ ] Config validation via pydantic/dataclasses schemas for the Hydra configs in `configs/` — catch typos/bad values
       at config-load time rather than mid-training
-- [ ] `docs/faq.md` — anticipate likely interviewer questions ("why plate-aware splits?", "why Z-factor?", "what
-      would you do with more compute/data?") — doubles as interview prep while looking like documentation rigor
+- [ ] `docs/faq.md` — placeholder file exists; still needs real interview-prep content ("why plate-aware splits?", etc.)
 
 ## Suggested build order (milestones)
 
