@@ -28,14 +28,22 @@ High-content screening (HCS) generates thousands of microscopy images per experi
 ## Repository structure
 
 ```
+configs/                 Hydra/OmegaConf experiment configs
+scripts/                 CLI entry points (download_data.py, train.py, evaluate.py, infer.py)
 src/
+  data/                  download, preprocessing, dataset/dataloader, plate-aware splits
   segmentation/          cell instance segmentation (U-Net / Cellpose)
-  features/              self-supervised pretraining + embedding extraction
-  anomaly_detection/     phenotype anomaly scoring vs. controls
+  features/              self-supervised pretraining + embedding extraction + batch-effect correction
+  anomaly_detection/     phenotype anomaly scoring vs. controls (incl. Z-factor/SSMD)
   moa_classification/    mechanism-of-action classifier + uncertainty estimation
+  active_learning/       simulated compound-prioritization loop
+  multimodal/            (stretch) image + molecular graph fusion for MOA
   explainability/        Grad-CAM / attention visualizations
+  evaluation/            benchmarking vs. classical CellProfiler pipeline
   transfer_defense_demo/ backbone transfer to aerial/overhead imagery
   mlops/                 training/inference scripts, tracking, API
+  utils/                 seeding, logging, shared metrics
+tests/                   unit tests mirroring src/ structure
 docker/                  containerized training & inference
 notebooks/               exploratory analysis
 docs/                    write-ups, benchmark comparisons vs. CellProfiler
@@ -43,7 +51,7 @@ docs/                    write-ups, benchmark comparisons vs. CellProfiler
 
 ## Status
 
-Project scaffolding in progress. See open issues for current milestones.
+Project scaffolding in progress — see [TODO.md](TODO.md) for the full milestone checklist.
 
 ## Disclaimer
 
