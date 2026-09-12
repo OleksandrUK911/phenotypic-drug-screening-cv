@@ -6,11 +6,14 @@ cross-cutting concerns that don't belong to a single module.
 
 Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
-**Status snapshot:** core ML pipeline (sections 1–5 and 7: data → segmentation → SSL features →
-anomaly detection → MOA classification → explainability) is implemented with 42/42 unit tests
-passing. Repo governance/ethics/devex scaffolding (sections 16, 18, 22) partially in place. Not
-yet started: evaluation/baselines, active learning, multimodal, transfer-defense demo, MLOps
-training/serving, CI, and most documentation content beyond placeholders.
+**Status snapshot:** core ML pipeline (sections 1–5, 7, 8: data → segmentation → SSL features →
+anomaly detection → MOA classification → explainability → evaluation/baselines) is implemented
+with 54/54 unit tests passing. Statistical rigor machinery (section 21: bootstrap CI, paired
+significance test) is implemented and wired into the benchmark comparison, but not yet run on
+real (non-synthetic) results — that requires an actual training run, which hasn't happened yet.
+Repo governance/ethics/devex scaffolding (sections 16, 18, 22) partially in place. Not yet
+started: active learning, multimodal, transfer-defense demo, MLOps training/serving, CI, and
+most documentation content beyond placeholders.
 
 ## 0. Repo foundations
 
@@ -78,11 +81,11 @@ training/serving, CI, and most documentation content beyond placeholders.
 - [x] Aggregate explanation maps per MOA class — "what morphological region drives this MOA call"
 - [x] Sanity check: automated flagging of explanations whose activation mass falls mostly outside the segmented cell (background-heavy)
 
-## 8. Evaluation & baselines (`src/evaluation/`) — NEW MODULE
+## 8. Evaluation & baselines (`src/evaluation/`) — [~] core implemented, not yet run on real data
 
-- [ ] Classical baseline: CellProfiler feature extraction + simple classifier (RandomForest/SVM)
-- [ ] Side-by-side benchmark table: classical pipeline vs. this deep pipeline (accuracy, F1, Z-factor, compute cost)
-- [ ] Standardized metrics module shared across anomaly_detection/moa_classification (`src/utils/metrics.py`)
+- [x] Classical baseline: hand-crafted CellProfiler-style shape/intensity features (`classical_features.py`, via `skimage.regionprops`, not an actual CellProfiler pipeline invocation) + RandomForest classifier (`baseline_classifier.py`)
+- [~] Benchmark comparison: `benchmark.py` combines bootstrap CIs + paired significance test into a `deep_wins` verdict — tested on synthetic scores only, not yet run against real deep-pipeline vs. classical results
+- [x] Standardized metrics module shared across modules (`src/utils/metrics.py` — `bootstrap_ci`)
 - [ ] `docs/results.md` — final numbers, plots, before/after segmentation examples
 
 ## 9. Multimodal fusion (`src/multimodal/`) — stretch goal, optional
@@ -182,13 +185,13 @@ training/serving, CI, and most documentation content beyond placeholders.
 - [ ] Document these hardening choices in `src/mlops/README.md` — shows you thought about a *public* demo differently
       from a local research script
 
-## 21. Statistical rigor
+## 21. Statistical rigor — [~] machinery implemented, not yet applied to real results
 
-- [ ] Report confidence intervals (bootstrap) alongside point-estimate metrics (accuracy, Z-factor, AUC), not just
-      single numbers — distinguishes a portfolio project from a tutorial copy-paste
+- [x] `bootstrap_ci` (`src/utils/metrics.py`) — percentile bootstrap CI for an arbitrary statistic, tested
 - [ ] Multiple-seed reruns for headline results (mean ± std across ≥3 seeds) where compute allows
-- [ ] Significance test (e.g. paired bootstrap) when claiming the deep pipeline "beats" the CellProfiler baseline in
-      `docs/results.md` — an unqualified single-number comparison is a common credibility gap in ML portfolios
+- [x] `paired_bootstrap_pvalue` (`src/evaluation/significance.py`) — paired bootstrap significance test, wired into
+      `compare_pipelines` (`src/evaluation/benchmark.py`); still needs to be run on real deep-vs-classical results
+      rather than only tested on synthetic data
 
 ## 22. Developer experience
 
