@@ -28,9 +28,7 @@ def test_tvn_centers_each_plates_controls_near_zero():
 
     corrected = typical_variation_normalization(embeddings, metadata)
 
-    control_vecs = np.stack(
-        [corrected[(p, w)] for (p, w), m in metadata.items() if m.is_control]
-    )
+    control_vecs = np.stack([corrected[(p, w)] for (p, w), m in metadata.items() if m.is_control])
     assert np.linalg.norm(control_vecs.mean(axis=0)) < 1.0
 
 

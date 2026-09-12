@@ -60,8 +60,6 @@ def nt_xent_loss(z1: torch.Tensor, z2: torch.Tensor, temperature: float = 0.5) -
     sim = z @ z.T / temperature
     sim.fill_diagonal_(float("-inf"))
 
-    positive_idx = torch.cat(
-        [torch.arange(batch_size, 2 * batch_size), torch.arange(0, batch_size)]
-    ).to(z.device)
+    positive_idx = torch.cat([torch.arange(batch_size, 2 * batch_size), torch.arange(0, batch_size)]).to(z.device)
 
     return F.cross_entropy(sim, positive_idx)

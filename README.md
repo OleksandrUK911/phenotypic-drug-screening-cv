@@ -1,5 +1,9 @@
 # Phenotypic Drug Screening via Computer Vision
 
+[![CI](https://github.com/OleksandrUK911/phenotypic-drug-screening-cv/actions/workflows/ci.yml/badge.svg)](https://github.com/OleksandrUK911/phenotypic-drug-screening-cv/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+
 Deep learning pipeline for **phenotypic drug screening**: segmenting cell morphology from high-content microscopy imagery, detecting anomalous (toxic/effective) phenotypes, and classifying mechanism of action (MOA) — the same class of problem tackled by companies like **Recursion Pharmaceuticals** and **Exscientia** (Oxford/Dundee, UK).
 
 A secondary module demonstrates that the same segmentation/anomaly-detection backbone transfers to overhead/aerial imagery, relevant to defense & security imagery-analysis pipelines (e.g. programmes funded via the UK's **DASA**).

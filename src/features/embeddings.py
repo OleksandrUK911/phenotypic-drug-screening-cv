@@ -24,13 +24,13 @@ def extract_cell_embeddings(model: SimCLRModel, loader: DataLoader, device: str 
         images = batch["image"].to(device)
         embeddings = model.embed(images).cpu().numpy()
         for i in range(len(embeddings)):
-            results.append(
-                CellEmbedding(plate=batch["plate"][i], well=batch["well"][i], embedding=embeddings[i])
-            )
+            results.append(CellEmbedding(plate=batch["plate"][i], well=batch["well"][i], embedding=embeddings[i]))
     return results
 
 
-def aggregate_to_well(cell_embeddings: list[CellEmbedding], method: str = "median") -> dict[tuple[str, str], np.ndarray]:
+def aggregate_to_well(
+    cell_embeddings: list[CellEmbedding], method: str = "median"
+) -> dict[tuple[str, str], np.ndarray]:
     """Pool per-cell embeddings to one vector per (plate, well).
 
     Median pooling (default) is more robust than mean to a handful of

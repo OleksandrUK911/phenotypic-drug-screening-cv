@@ -3,7 +3,9 @@ from __future__ import annotations
 import numpy as np
 
 
-def paired_bootstrap_pvalue(scores_a: np.ndarray, scores_b: np.ndarray, n_bootstrap: int = 2000, seed: int = 0) -> float:
+def paired_bootstrap_pvalue(
+    scores_a: np.ndarray, scores_b: np.ndarray, n_bootstrap: int = 2000, seed: int = 0
+) -> float:
     """One-sided paired bootstrap test for whether `scores_a` exceeds `scores_b`.
 
     Used to test "does the deep pipeline actually beat CellProfiler, or could

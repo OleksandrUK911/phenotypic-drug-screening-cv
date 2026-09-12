@@ -33,9 +33,7 @@ def typical_variation_normalization(
 
     corrected: dict[tuple[str, str], np.ndarray] = {}
     for plate, wells in by_plate.items():
-        control_vecs = np.stack(
-            [emb for well, emb in wells if metadata[(plate, well)].is_control]
-        )
+        control_vecs = np.stack([emb for well, emb in wells if metadata[(plate, well)].is_control])
         if len(control_vecs) < 2:
             raise ValueError(f"Plate {plate} has fewer than 2 control wells; cannot estimate covariance.")
 

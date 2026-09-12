@@ -1,4 +1,3 @@
-import numpy as np
 from sklearn.datasets import make_classification
 
 from src.evaluation.baseline_classifier import classical_baseline_cv_scores

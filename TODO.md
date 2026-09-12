@@ -8,23 +8,24 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 **Status snapshot:** core ML pipeline (sections 1–5, 7, 8: data → segmentation → SSL features →
 anomaly detection → MOA classification → explainability → evaluation/baselines) is implemented
-with 67/67 unit tests passing. Statistical rigor machinery (section 21) and the FastAPI inference
-API's hardening layer (section 20: validation, rate limiting, health check) are implemented and
+with 67/67 unit tests passing, all clean under ruff/black/isort. Statistical rigor machinery
+(section 21) and the FastAPI inference API's hardening layer (section 20) are implemented and
 tested, but nothing has run end-to-end on real data yet — no training run has happened, so the
-API's `/predict` honestly returns 503 rather than a real prediction. Repo governance/ethics/devex
-scaffolding (sections 16, 18, 22) partially in place. Not yet started: active learning,
-multimodal, transfer-defense demo, actual training/tracking scripts, Docker, CI, and most
-documentation content beyond placeholders.
+API's `/predict` honestly returns 503 rather than a real prediction. Repo foundations (section 0:
+pyproject.toml, LICENSE, pre-commit, Makefile) and CI (section 13, running lint + tests on every
+push/PR) are now in place. Governance/ethics/devex scaffolding (sections 16, 18, 22) partially in
+place. Not yet started: active learning, multimodal, transfer-defense demo, actual
+training/tracking scripts, Docker, and most documentation content beyond placeholders.
 
-## 0. Repo foundations
+## 0. Repo foundations — [~] mostly done
 
-- [ ] `pyproject.toml` — package `src` as an installable module (`pip install -e .`), pin Python version
-- [ ] `LICENSE` (MIT)
+- [x] `pyproject.toml` — package metadata + pytest/black/ruff/isort/mypy config (packaging via `pip install -e .` configured, not yet verified by an actual editable install)
+- [x] `LICENSE` (MIT)
 - [ ] `CITATION.cff` — cite BBBC021/JUMP-CP dataset papers and Cellpose/SimCLR/DINO papers used
-- [ ] `.pre-commit-config.yaml` — black, ruff, isort, mypy (basic), nbstripout for notebooks
-- [ ] `.github/workflows/ci.yml` — lint + type-check + pytest on push/PR
+- [x] `.pre-commit-config.yaml` — ruff, black, isort, nbstripout (mypy hook not added yet)
+- [x] `.github/workflows/ci.yml` — ruff + black + isort + pytest (with coverage) on push/PR to master; no separate mypy step yet
 - [ ] `.github/ISSUE_TEMPLATE/` — bug report + experiment-tracking issue templates
-- [ ] `Makefile` or `justfile` — `make setup`, `make train`, `make test`, `make lint` shortcuts
+- [x] `Makefile` — `make setup`, `make test`, `make lint`, `make format`
 - [ ] `docker-compose.yml` — local MLflow tracking server + inference API service
 
 ## 1. Data layer (`src/data/`) — [x] core implemented
@@ -117,13 +118,13 @@ documentation content beyond placeholders.
 - [ ] Hydra/OmegaConf YAML per experiment (segmentation.yaml, ssl_pretrain.yaml, moa_classifier.yaml, etc.)
 - [ ] Environment config (paths, seeds, device) separated from model/experiment config
 
-## 13. Testing (`tests/`) — [~] 35/35 tests passing, CI not wired yet
+## 13. Testing (`tests/`) — [~] 67/67 tests passing, CI now wired up
 
 - [ ] Unit tests for preprocessing itself (illumination correction / normalization correctness) — not yet written
 - [x] Unit tests for plate-aware split correctness (determinism, no leakage, too-few-plates error)
 - [ ] Segmentation smoke test on a tiny fixture image through the actual Cellpose wrapper (postprocessing/QC are tested; Cellpose itself is not, since it's a heavy optional dependency)
 - [x] Metrics unit tests (Z-factor/SSMD computed against synthetic worked examples — well-separated vs. overlapping controls)
-- [ ] CI runs all of the above on every push (see section 0 — `ci.yml` not yet created)
+- [x] CI (`.github/workflows/ci.yml`) runs ruff/black/isort + pytest with coverage on every push/PR to master
 
 ## 14. Documentation & portfolio polish
 
@@ -160,7 +161,7 @@ documentation content beyond placeholders.
 ## 18. Documentation site & repo polish
 
 - [ ] `mkdocs.yml` + `docs/` as an MkDocs Material site, published via GitHub Pages
-- [ ] README badges: CI status, license, Python version, (optional) docs-site link
+- [x] README badges: CI status, license, Python version (docs-site link still pending MkDocs)
 - [x] `CONTRIBUTING.md`
 - [x] `CODEOWNERS`
 - [x] `.env.example`

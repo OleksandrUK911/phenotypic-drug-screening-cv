@@ -9,8 +9,7 @@ from src.mlops.validation import UploadValidationError, validate_upload
 
 
 class Predictor(Protocol):
-    def predict(self, image_bytes: bytes) -> dict:
-        ...
+    def predict(self, image_bytes: bytes) -> dict: ...
 
 
 class _NotLoadedPredictor:
