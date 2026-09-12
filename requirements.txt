@@ -4,6 +4,7 @@ numpy
 pandas
 scikit-learn
 scikit-image
+scipy
 opencv-python
 cellpose
 albumentations
@@ -14,3 +15,5 @@ uvicorn
 matplotlib
 seaborn
 grad-cam
+requests
+beautifulsoup4
