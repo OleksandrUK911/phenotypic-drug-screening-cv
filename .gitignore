@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Data & models (large binaries, do not commit)
+data/raw/
+data/processed/
+*.tif
+*.tiff
+*.png
+*.jpg
+!docs/**/*.png
+*.h5
+*.ckpt
+*.pt
+*.pth
+*.onnx
+
+# Experiment tracking
+mlruns/
+wandb/
+
+# Env
+.env
+.DS_Store
