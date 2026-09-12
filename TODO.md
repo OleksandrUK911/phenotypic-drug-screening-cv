@@ -121,6 +121,38 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] README: explicit "UK context" section referencing Exscientia/Recursion-style methodology and DASA-relevant transferability
 - [ ] Write a short blog-style `docs/writeup.md` summarizing findings — good for LinkedIn/portfolio link
 
+## 15. Reproducibility & versioning
+
+- [ ] `DATASET_CARD.md` (in `data/`) — source, license terms of BBBC021/JUMP-CP, known biases/limitations, intended use
+- [ ] `docs/model_card.md` — per Google/HF model-card convention: intended use, training data, evaluation results, known limitations, out-of-scope uses (important given pharma/defense-adjacent framing)
+- [ ] DVC (or lightweight alternative: tracked hash manifest) for dataset/model artifact versioning — avoids "which weights produced these numbers" ambiguity
+- [ ] Environment lockfile: `requirements.lock` or `poetry.lock` / `environment.yml` pinned versions, not just loose `requirements.txt`
+- [ ] `CHANGELOG.md` (Keep a Changelog format) — tag milestones as they're completed
+- [ ] Document exact hardware/compute budget used (GPU type, hours) — also note a **Colab/Kaggle-notebook path** for reviewers without a GPU to reproduce a small-scale run
+- [ ] Model export: TorchScript/ONNX for the final inference model, with a load/inference smoke test
+
+## 16. Ethics, compliance & responsible-use framing
+
+- [ ] `ETHICS.md` — explicit statement: public data only, no PII, no clinical/diagnostic claims, no operational defense claims (ties into the transfer-to-defense demo's disclaimer)
+- [ ] Dual-use awareness note: briefly acknowledge that phenotypic screening + defense-imagery transfer touches dual-use-adjacent territory, and state the project's boundaries explicitly (portfolio/research only)
+- [ ] License compliance check for BBBC021/JUMP-CP redistribution terms (don't recommit raw data to the repo — already gitignored, but document *why* in `data/DATASET_CARD.md`)
+- [ ] `.github/dependabot.yml` — automated dependency vulnerability alerts (cheap, signals security hygiene)
+
+## 17. Deployment & live demo (portfolio-critical)
+
+- [ ] Host a lightweight interactive demo (Streamlit/Gradio) on Hugging Face Spaces or Render free tier, linked at the top of the README — recruiters trying a live demo beats reading code
+- [ ] `docs/uk_positioning.md` — standalone one-pager connecting the project to Exscientia/Recursion-style methodology and DASA-relevant transferability; reusable text block for cover letters/LinkedIn, kept separate from README so it can evolve independently
+- [ ] Record a 60–90s demo GIF/video of the FastAPI + Streamlit flow for the README hero section
+- [ ] `docs/related_work.md` — table comparing this project's MOA-classification results against published BBBC021 benchmark numbers from literature (shows awareness of SOTA, not just "it works")
+
+## 18. Documentation site & repo polish
+
+- [ ] `mkdocs.yml` + `docs/` as an MkDocs Material site, published via GitHub Pages — turns scattered `.md` files into a browsable site (nice portfolio link separate from the raw repo)
+- [ ] README badges: CI status, license, Python version, (optional) docs-site link
+- [ ] `CONTRIBUTING.md` — even solo, states code style/PR conventions; signals professionalism to reviewers
+- [ ] `CODEOWNERS` — trivial for a solo repo but a recognized convention
+- [ ] `.env.example` — documents expected env vars (MLflow tracking URI, etc.) without committing secrets
+
 ## Suggested build order (milestones)
 
 1. Data layer + segmentation baseline (Cellpose) → get per-cell crops flowing
@@ -132,4 +164,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 7. Active learning module → adds an "AI-driven discovery" narrative
 8. Transfer-to-defense demo → cross-domain positioning
 9. Multimodal fusion → stretch goal if time allows
-10. Docs/polish pass → portfolio-ready
+10. Reproducibility & versioning pass (lockfiles, model/dataset cards, CHANGELOG) → results are trustworthy/reproducible
+11. Ethics/compliance pass (ETHICS.md, dependabot, license checks) → responsible-use framing is explicit
+12. Deployment: hosted live demo + UK-positioning write-up + demo video → portfolio is *shareable*, not just readable
+13. Docs site (MkDocs) + badges + polish pass → portfolio-ready
