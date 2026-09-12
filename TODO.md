@@ -153,6 +153,47 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] `CODEOWNERS` — trivial for a solo repo but a recognized convention
 - [ ] `.env.example` — documents expected env vars (MLflow tracking URI, etc.) without committing secrets
 
+## 19. Scalability & large-data engineering
+
+- [ ] Note in `data/DATASET_CARD.md` the realistic scale (JUMP-CP is multi-terabyte) and explicitly scope down to a
+      tractable subset (e.g. a handful of plates/compounds) for the portfolio version — state this decision explicitly
+      so it reads as a deliberate scoping choice, not an oversight
+- [ ] Efficient data format for training: WebDataset or FFCV instead of loose file reads, if subset is still large
+- [ ] Cloud storage integration (S3/GCS) for the dataset subset if it doesn't fit comfortably on local disk
+- [ ] Multi-GPU / mixed-precision training notes in `src/mlops/` (even if only tested on a single GPU, document the
+      `torch.cuda.amp` + `DistributedDataParallel` path for credibility)
+- [ ] Document expected wall-clock/cost for each pipeline stage (segmentation, SSL pretraining, classification) at the
+      chosen data scale — ties into the compute-budget doc from section 15
+
+## 20. API hardening & observability (production-readiness of the demo service)
+
+- [ ] Input validation on the FastAPI inference endpoint: max upload size, allowed MIME types/extensions,
+      image-dimension bounds (defends against decompression-bomb-style abuse on a public demo)
+- [ ] Rate limiting (e.g. `slowapi`) on the public-facing demo endpoint
+- [ ] Structured request/response logging (no PII/raw images retained by default)
+- [ ] Basic health-check endpoint (`/health`) + readiness check for the loaded model
+- [ ] Optional: lightweight metrics endpoint (Prometheus-format) — request count, latency histogram, error rate
+- [ ] Document these hardening choices in `src/mlops/README.md` — shows you thought about a *public* demo differently
+      from a local research script
+
+## 21. Statistical rigor
+
+- [ ] Report confidence intervals (bootstrap) alongside point-estimate metrics (accuracy, Z-factor, AUC), not just
+      single numbers — distinguishes a portfolio project from a tutorial copy-paste
+- [ ] Multiple-seed reruns for headline results (mean ± std across ≥3 seeds) where compute allows
+- [ ] Significance test (e.g. paired bootstrap) when claiming the deep pipeline "beats" the CellProfiler baseline in
+      `docs/results.md` — an unqualified single-number comparison is a common credibility gap in ML portfolios
+
+## 22. Developer experience
+
+- [ ] `requirements-dev.txt` — separate dev-only deps (pytest, black, ruff, mypy, jupyter) from runtime `requirements.txt`
+- [ ] `.devcontainer/devcontainer.json` — one-click reproducible dev environment (VS Code Dev Containers/Codespaces)
+- [ ] `.github/PULL_REQUEST_TEMPLATE.md` — checklist (tests pass, lint clean, TODO.md updated) even for solo use
+- [ ] Config validation via pydantic/dataclasses schemas for the Hydra configs in `configs/` — catch typos/bad values
+      at config-load time rather than mid-training
+- [ ] `docs/faq.md` — anticipate likely interviewer questions ("why plate-aware splits?", "why Z-factor?", "what
+      would you do with more compute/data?") — doubles as interview prep while looking like documentation rigor
+
 ## Suggested build order (milestones)
 
 1. Data layer + segmentation baseline (Cellpose) → get per-cell crops flowing
@@ -167,4 +208,6 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 10. Reproducibility & versioning pass (lockfiles, model/dataset cards, CHANGELOG) → results are trustworthy/reproducible
 11. Ethics/compliance pass (ETHICS.md, dependabot, license checks) → responsible-use framing is explicit
 12. Deployment: hosted live demo + UK-positioning write-up + demo video → portfolio is *shareable*, not just readable
-13. Docs site (MkDocs) + badges + polish pass → portfolio-ready
+13. API hardening pass (validation, rate limiting, health checks) → demo survives public traffic without babysitting
+14. Statistical rigor pass (CIs, multi-seed, significance test vs. baseline) → results hold up to scrutiny
+15. Docs site (MkDocs) + badges + polish pass → portfolio-ready

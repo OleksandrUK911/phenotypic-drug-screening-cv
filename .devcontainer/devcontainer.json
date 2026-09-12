@@ -1,0 +1,10 @@
+{
+  "name": "phenotypic-drug-screening-cv",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "postCreateCommand": "pip install -r requirements-dev.txt && pre-commit install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python", "charliermarsh.ruff", "ms-toolsai.jupyter"]
+    }
+  }
+}
