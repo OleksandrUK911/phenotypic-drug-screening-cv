@@ -11,7 +11,8 @@ albumentations
 pytorch-lightning
 mlflow
 fastapi
-uvicorn
+uvicorn[standard]
+python-multipart
 matplotlib
 seaborn
 grad-cam

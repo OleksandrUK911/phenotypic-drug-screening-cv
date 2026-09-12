@@ -8,12 +8,13 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
 **Status snapshot:** core ML pipeline (sections 1–5, 7, 8: data → segmentation → SSL features →
 anomaly detection → MOA classification → explainability → evaluation/baselines) is implemented
-with 54/54 unit tests passing. Statistical rigor machinery (section 21: bootstrap CI, paired
-significance test) is implemented and wired into the benchmark comparison, but not yet run on
-real (non-synthetic) results — that requires an actual training run, which hasn't happened yet.
-Repo governance/ethics/devex scaffolding (sections 16, 18, 22) partially in place. Not yet
-started: active learning, multimodal, transfer-defense demo, MLOps training/serving, CI, and
-most documentation content beyond placeholders.
+with 67/67 unit tests passing. Statistical rigor machinery (section 21) and the FastAPI inference
+API's hardening layer (section 20: validation, rate limiting, health check) are implemented and
+tested, but nothing has run end-to-end on real data yet — no training run has happened, so the
+API's `/predict` honestly returns 503 rather than a real prediction. Repo governance/ethics/devex
+scaffolding (sections 16, 18, 22) partially in place. Not yet started: active learning,
+multimodal, transfer-defense demo, actual training/tracking scripts, Docker, CI, and most
+documentation content beyond placeholders.
 
 ## 0. Repo foundations
 
@@ -101,12 +102,14 @@ most documentation content beyond placeholders.
 - [ ] Short comparative write-up: what transferred well, what didn't, why (framing for defense/remote-sensing roles)
 - [ ] Explicit disclaimer: portfolio demo only, no operational claims
 
-## 11. MLOps (`src/mlops/`)
+## 11. MLOps (`src/mlops/`) — [~] API skeleton + hardening implemented; no trained model wired in yet
 
 - [ ] MLflow experiment tracking wired into all training scripts (params, metrics, artifacts)
 - [ ] `scripts/train.py`, `scripts/evaluate.py`, `scripts/infer.py` — CLI entry points using `configs/*.yaml`
 - [ ] Dockerfile for training environment + separate lightweight Dockerfile for inference
-- [ ] FastAPI inference service: upload image → segmentation mask + anomaly score + MOA prediction
+- [~] FastAPI inference service (`api.py`): `/health` + `/predict` with pluggable `Predictor` protocol implemented
+      and tested; returns an honest 503 ("not yet trained/loaded") until a real model is wired in via
+      `app.state.predictor` — segmentation/anomaly/MOA prediction logic itself isn't connected yet
 - [ ] Minimal frontend or Streamlit demo hitting the FastAPI service (for portfolio screenshots/GIF)
 
 ## 12. Configs (`configs/`)
@@ -174,16 +177,16 @@ most documentation content beyond placeholders.
 - [ ] Document expected wall-clock/cost for each pipeline stage (segmentation, SSL pretraining, classification) at the
       chosen data scale — ties into the compute-budget doc from section 15
 
-## 20. API hardening & observability (production-readiness of the demo service)
+## 20. API hardening & observability (production-readiness of the demo service) — [~] mostly implemented
 
-- [ ] Input validation on the FastAPI inference endpoint: max upload size, allowed MIME types/extensions,
-      image-dimension bounds (defends against decompression-bomb-style abuse on a public demo)
-- [ ] Rate limiting (e.g. `slowapi`) on the public-facing demo endpoint
+- [x] Input validation (`validation.py`): max upload size, allowed MIME types, image-dimension bounds
+- [x] Rate limiting (`rate_limiter.py`): dependency-free fixed-window limiter, keyed per client; a real
+      multi-instance deployment would need a shared backing store instead of the in-memory dict — documented as such
 - [ ] Structured request/response logging (no PII/raw images retained by default)
-- [ ] Basic health-check endpoint (`/health`) + readiness check for the loaded model
+- [x] Basic health-check endpoint (`/health`); readiness reflects predictor load state via the 503 on `/predict`
+      rather than a separate `/ready` endpoint
 - [ ] Optional: lightweight metrics endpoint (Prometheus-format) — request count, latency histogram, error rate
-- [ ] Document these hardening choices in `src/mlops/README.md` — shows you thought about a *public* demo differently
-      from a local research script
+- [x] Document these hardening choices in `src/mlops/README.md`
 
 ## 21. Statistical rigor — [~] machinery implemented, not yet applied to real results
 
