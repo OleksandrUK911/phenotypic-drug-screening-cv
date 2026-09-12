@@ -6,15 +6,15 @@ cross-cutting concerns that don't belong to a single module.
 
 Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 
-**Status snapshot:** core ML pipeline (sections 1–5, 7, 8: data → segmentation → SSL features →
-anomaly detection → MOA classification → explainability → evaluation/baselines) is implemented
-with 67/67 unit tests passing, all clean under ruff/black/isort. Statistical rigor machinery
-(section 21) and the FastAPI inference API's hardening layer (section 20) are implemented and
-tested, but nothing has run end-to-end on real data yet — no training run has happened, so the
-API's `/predict` honestly returns 503 rather than a real prediction. Repo foundations (section 0:
-pyproject.toml, LICENSE, pre-commit, Makefile) and CI (section 13, running lint + tests on every
-push/PR) are now in place. Governance/ethics/devex scaffolding (sections 16, 18, 22) partially in
-place. Not yet started: active learning, multimodal, transfer-defense demo, actual
+**Status snapshot:** core ML pipeline (sections 1–8: data → segmentation → SSL features →
+anomaly detection → MOA classification → active learning → explainability → evaluation/baselines)
+is implemented with 76/76 unit tests passing, all clean under ruff/black/isort, CI green on
+GitHub Actions. Statistical rigor machinery (section 21) and the FastAPI inference API's
+hardening layer (section 20) are implemented and tested, but nothing has run end-to-end on real
+data yet — no training run has happened, so the API's `/predict` honestly returns 503 and the
+active-learning/benchmark results are validated only on synthetic data. Repo foundations
+(section 0) and CI (section 13) are in place. Governance/ethics/devex scaffolding (sections 16,
+18, 22) partially in place. Not yet started: multimodal fusion, transfer-defense demo, actual
 training/tracking scripts, Docker, and most documentation content beyond placeholders.
 
 ## 0. Repo foundations — [~] mostly done
@@ -70,11 +70,14 @@ training/tracking scripts, Docker, and most documentation content beyond placeho
 - [x] Uncertainty quantification: MC Dropout + Deep Ensembles, plus reliability diagram / Expected Calibration Error
 - [x] Confusion matrix analysis grouped by MOA family, not just raw accuracy
 
-## 6. Active learning (`src/active_learning/`) — NEW MODULE
+## 6. Active learning (`src/active_learning/`) — [x] core implemented
 
-- [ ] Simulate a compound-prioritization loop: start with small labeled subset, use model uncertainty
-      (or embedding-space diversity) to pick next batch of compounds to "screen"
-- [ ] Compare active-learning sampling vs. random sampling — learning curve (accuracy vs. #compounds screened)
+- [x] Simulate a compound-prioritization loop (`simulation.py`): start with small labeled subset, use model
+      uncertainty (`sampling.uncertainty_sampling`) or embedding-space diversity (`sampling.diversity_sampling`,
+      greedy farthest-point) to pick the next batch of compounds to "screen"
+- [x] Compare active-learning sampling vs. random sampling — learning curve (accuracy vs. #compounds screened),
+      with a deterministic test confirming uncertainty sampling beats random on a fixed synthetic benchmark;
+      not yet run on real Cell Painting embeddings/MOA labels
 - [ ] Short write-up connecting this to real AI-driven drug discovery triage (Exscientia-style narrative)
 
 ## 7. Explainability (`src/explainability/`) — [x] core implemented
