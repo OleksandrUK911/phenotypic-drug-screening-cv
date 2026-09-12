@@ -1,5 +1,5 @@
 torch>=2.2
-torchvision>=0.17
+torchvision>=0.29.0
 numpy
 pandas
 scikit-learn
